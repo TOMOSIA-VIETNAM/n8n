@@ -1,0 +1,39 @@
+version: '3'
+
+services:
+  api:
+    image: n8nio/n8n
+    ports:
+      - "5678:5678"
+    env_file:
+      - .env
+    depends_on:
+      - database
+    networks:
+      - n8n-network
+
+  database:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=n8n-user
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=n8n-database
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - n8n-network
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  postgres-data:
+
+networks:
+  n8n-network:
+    driver: bridge 
+  
